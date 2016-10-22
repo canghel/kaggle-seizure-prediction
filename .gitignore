@@ -1,3 +1,6 @@
 # directories to ignore
 data/*  
-output/*  
+output/*
+
+# ignore R history, too
+.Rhistory

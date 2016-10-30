@@ -3,8 +3,7 @@
 % do it for a dataset
 
 %% Load dataset
-ss = 1; % patient value
-whichSet = 'test';
+
 dataPath = '../../data';
 folderName = strcat(whichSet, '_', num2str(ss));
 outputPath = '../../output/dataProcessing';
@@ -17,7 +16,8 @@ numFiles = length(allFiles);
 windowWidth = 1000;
 windowFracOverlap = 1/4;
 
-avgFreq = zeros(numFiles, 1024);
+%avgFreq = zeros(numFiles, 1024);
+medFreq = zeros(numFiles, 1024);
 
 % really slow, really bad... 
 for j=1:numFiles
@@ -28,8 +28,12 @@ for j=1:numFiles
     fileToLoad = allFiles(j);
     fileToLoad = fileToLoad{1};
     % get avg freq
-    avgFreq(j,:) = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap);
+    % avgFreq(j,:) = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap);
+    medFreq(j,:) = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap);
 end
 
-filename = strcat(num2str(yyyymmdd(datetime)), '_', folderName, '_avgFreq.mat');
-save(fullfile(outputPath, filename), 'allFiles', 'avgFreq');
+%filename = strcat(num2str(yyyymmdd(datetime)), '_', folderName, '_avgFreq.mat');
+%save(fullfile(outputPath, filename), 'allFiles', 'avgFreq');
+
+filename = strcat(num2str(yyyymmdd(datetime)), '_', folderName, '_medFreq.mat');
+save(fullfile(outputPath, filename), 'allFiles', 'medFreq');

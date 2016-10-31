@@ -24,7 +24,6 @@ count = 1;
 for ss = 1:length(setVals) % whether set 1,2, or 3
     for tt = 1:length(trainOrTest) % whether training or testing index
         
-        ss = 1; tt = 1;
         dataset = strcat(trainOrTest{tt}, num2str(setVals(ss)));
         disp('Working on dataset below: --------------------------------');
         disp(dataset);
@@ -51,7 +50,7 @@ for ss = 1:length(setVals) % whether set 1,2, or 3
         end
         
         infoTable.datasets{count,1} = dataset;
-        infoTable.filenames{count,1} = cellstr(dataFilenames{1,:});
+        infoTable.filenames{count,1} = dataFilenames;
         infoTable.fracZero{count,1} = fracZero;
         count = count+1;
     end

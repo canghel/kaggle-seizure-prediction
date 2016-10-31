@@ -1,4 +1,5 @@
-function avgFreq = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap)
+%function avgFreq = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap)
+function medFreq = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap)
 % function out = simpleFreqFeatures(fileToLoad, folderName, windowWidth, windowFracOverlap)
 
 for channel = 1:16
@@ -32,12 +33,16 @@ for channel = 1:16
     
     subsetPs = ps(fLower:fHigher, tNonzero);
     % subsetW = w(fLower:fHigher);
-    avgSubsetPs = mean(subsetPs,2);
-    nn = length(avgSubsetPs);
+    %avgSubsetPs = mean(subsetPs,2);
+    %nn = length(avgSubsetPs);
+    medSubsetPs = median(subsetPs,2);
+    nn = length(medSubsetPs);
     
     if (channel == 1)
-        avgFreq = zeros(1, nn*16);
+        %avgFreq = zeros(1, nn*16);
+        medFreq = zeros(1, nn*16);
     end
-    avgFreq(1, (nn*(channel-1)+1):(nn*channel)) =  avgSubsetPs;
+    %avgFreq(1, (nn*(channel-1)+1):(nn*channel)) =  avgSubsetPs;
+    medFreq(1, (nn*(channel-1)+1):(nn*channel)) =  medSubsetPs;
     
 end

@@ -25,7 +25,7 @@ for (set in 1:3){
 	    );
 
 	# re-format feature data
-	trainData <-  readMat(file.path("..", "..", "output", "dataProcessing", paste0('20161022_train_', set, '_avgFreq.mat')));
+	trainData <-  readMat(file.path("..", "..", "output", "dataProcessing", paste0('20161025_train_', set, '_avgFreq.mat')));
 	files <- unlist(lapply(trainData$allFiles, "[[", 1));
 	trainData <- trainData$avgFreq;
 	rownames(trainData) <- files;
@@ -39,17 +39,24 @@ for (set in 1:3){
 
 	### TRAIN MODEL ###########################################################
 
-	# weight by 1-fraction of zeros
-	# no adjustment yet for imbalanced data
+	# readjust weights
+	# weight by (1-fraction of zeros)*fraction of observations with that outcome
+	numPreictal <- sum(trainBasicInfo$response);
+	numBaseline <- length(trainBasicInfo$response) - numPreictal;
+	baselineWeight <- numBaseline/length(trainBasicInfo$response);
+	trainBasicInfo$outcomeWeight <- baselineWeight;
+	trainBasicInfo$outcomeWeight[which(trainBasicInfo$response==1)] <- 1- baselineWeight;
+	trainBasicInfo$weights <- (1-trainBasicInfo$fracZeros)*trainBasicInfo$outcomeWeight;
+
 	cvfit <- cv.glmnet(trainData, 
 		trainBasicInfo$response, 
 		family = "binomial", 
 		type.measure = "auc",
-		weights = 1-trainBasicInfo$fracZeros
+		weights = trainBasicInfo$weights
 		);
 
 	# look at cv graph
-	png(file.path(outputPath, paste0(Sys.Date(), '_', set ,"_cvfit.png")));
+	png(file.path(outputPath, paste0(Sys.Date(),  "-",  substr(Sys.time(), 12, 19), '_', set ,"_cvfit.png")));
 	plot(cvfit); 
 	dev.off();
 
@@ -57,7 +64,7 @@ for (set in 1:3){
 	 
 	### PREDICT ###############################################################
 
-	testData <-  readMat(file.path("..", "..", "output", "dataProcessing", paste0('20161022_test_', set, '_avgFreq.mat')));
+	testData <-  readMat(file.path("..", "..", "output", "dataProcessing", paste0('20161025_test_', set, '_avgFreq.mat')));
 	files <- unlist(lapply(testData$allFiles, "[[", 1));
 	testData <- testData$avgFreq;
 	rownames(testData) <- files;
@@ -78,7 +85,7 @@ for (set in 1:3){
 results$Class[is.na(results$Class)] <- 0;
 
 write.table(results[,c(1,2)], 
-	file = file.path(outputPath, paste0(Sys.Date(), "_Basic.csv")), 
+	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_Basic.csv")), 
 	quote = FALSE, 
 	sep = ",",
 	col.names = TRUE,

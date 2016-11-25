@@ -61,7 +61,7 @@ for (patient in 1:3){
 		sep = ",",
 		row.names = FALSE,
 		col.names = TRUE
-  );
+	);
 }
 
 ### TEST DATASETS #############################################################

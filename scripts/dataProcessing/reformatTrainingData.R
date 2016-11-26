@@ -51,8 +51,8 @@ for (set in 1:3){
 }
 
 # write new info table to file
-goodFileInfo <- allTrainInfo[which(allTrainInfo$safe==1),c("image", "class", "fracZero")];
-colnames(goodFileInfo) <- c("files", "response", "fracZero")
+goodFileInfo <- allTrainInfo[which(allTrainInfo$safe==1),];
+colnames(goodFileInfo) <- c("files", "response", "safe", "fracZero", "sanityCheck")
 
 write.table(goodFileInfo, 
 	file = file.path("..", "..", "output", "dataProcessing", 
@@ -79,8 +79,9 @@ for (set in 1:3){
 	rownames(testData) <- files;
 
 	newTrainData <- rbind(trainData, testData);
-	print(length(which(rownames(newTrainData) %in% goodFileInfo$files)))
+	# NOTE: rewriting over 'trainData'
+	trainData <- newTrainData[which(rownames(newTrainData) %in% goodFileInfo$files),];
 
 	# save cleaned up files...
-	save(newTrainData, file=file.path("..", "..", "output", "dataProcessing", paste0(Sys.Date(),'_train_', set, '_avgFreq.mat')))
+	save(trainData, file=file.path("..", "..", "output", "dataProcessing", paste0(Sys.Date(),'_train_', set, '_avgFreq.RData')))
 }

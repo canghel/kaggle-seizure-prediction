@@ -1,15 +1,5 @@
 ### basic NNh2o.R #############################################################
-# trying just simplest idea 3) for now:
-#
-# ideas: 
-# 1) stacked autoencoder that decreases dim to 512-256 then goes down to 2 
-# classifier
-# 	- problem: weighing different samples? (only train with fracZero > something)
-# 	- can't do customisable NN (multivariate) using h2o
-# 2) two autoencoders, one for 0's and one for 1's
-#	- run new sample in both, then compare errors to determine the class 
-#	(method of comparing to other 1's and 0's signals?) 
-# 3) simplest: just 1024-(something)-2 classifier 
+# trying simplest thing: just 1024-(something)-2 classifier 
 
 ### PREAMBLE ##################################################################
 
@@ -18,25 +8,14 @@ library(data.table)
 library(h2o)
 h2o.init()
 
+outputPath <- file.path("..", "..", "output", "basicNNh2o"); 
+
 set.seed(1015);
-ae.seed <- 1;
+seedVal <- 1;
 
 ### SET UP OPTIONS FOR NETWORK ################################################
 
-layerSizes <- c(512, 256)
-ae <- list();
-
-args <- list(
-	activation = "Tanh", #activation function
-	epochs = 20, #training rounds
-	l1 = 1e-4,  #l1 penalty
-	adaptive_rate = TRUE, #whether to modify learning rate automatically
-	regression_stop = 1e-6, #early stopping
-	seed = ae.seed, #random seed
-	export_weights_and_biases = TRUE #export and save the weights
-	); 
-
-set <- 1;
+secondLayer <- 100
 
 ### LOAD AND PREPARE DATA #####################################################
 
@@ -47,70 +26,66 @@ basicInfo <- read.delim(
     );
 
 source("loadAvgFreqData.R");
-browser();
 
 temp <- merge(trainData, trainBasicInfo[, c("response", "weights")], by="row.names")
 rownames(temp) <- temp[,1];
 temp <- temp[,-1];
 predictors <- setdiff(names(temp), "response")
-response <- temp[,"response"];
-trainData <- temp[, -which(colnames(temp)=="response")];
+# make response categorical
+temp[, "response"] <- as.factor(temp[,"response"]);
+temp[, "weights"] <- round(100*temp[, "weights"]);  
+trainData <- temp;
 
-trainingData <- as.h2o(trainData[1:10,]);
+trainingData <- as.h2o(trainData);
 
 ### TRAIN #####################################################################
 
-aeModels <- vector();
+simpleModel <- h2o.deeplearning(
+	# training data
+	training_frame = trainingData,
+	x = predictors,
+	y = "response",
+	# structure of network
+	activation = "Tanh", 
+	hidden = c(secondLayer), 
+	# use adadelta
+	adaptive_rate = TRUE, 
+	# CV, epochs, dropout, penalty, weights
+	nfolds = 10,
+	# input_dropout_ratio = 0.2,
+   	epochs = 1000, 
+   	l1 = 1e-4,
+   	l2 = 1e-5, 
+	weights_column = "weights",
+	regression_stop = 1e-6, 
+	# other arguments
+	seed = seedVal, # may not be reproducible even with this due to memory management 
+	export_weights_and_biases = TRUE 
+	);
 
-# am actually going to do this the long way...
-# train first autoencoder ----------------------------------------------------#
+print(simpleModel@model$cross_validation_metrics_summary)
 
-j <- 1;
+png(file.path(outputPath, paste0(Sys.Date(),  "-",  substr(Sys.time(), 12, 19), '_', set ,"_h2o-roc.png")));
+plot(h2o.performance(simpleModel)) 
+dev.off();
 
-ae <- do.call(h2o.deeplearning, 
-	modifyList(list(
-			x = predictors,
-			training_frame = trainData,
-			autoencoder = TRUE,
-			weights_column = "weights",
-			hidden = layerSizes[j]),
-			autoencoder = TRUE,
-			args)
-		);
+path <- h2o.saveModel(simpleModel, path=outputPath, force=TRUE)
 
-print(paste("j = ",j,", Number of epochs: ", last(ae@model$scoring_history$epochs)))
-trainingData <- h2o.deepfeatures(ae,trainingData,layer=1)
-names(trainingData) <- gsub("DF", paste0("L",j,sep=""), names(trainingData))
-aeModels <- c(aeModels, ae)
+### PREDICTIONS ###############################################################
 
-w1.1 <- as.matrix(h2o.weights(aeModels[[1]], matrix_id=1));
-w1.2 <- as.matrix(h2o.weights(aeModels[[1]], matrix_id=2));
-biases1.1 <- as.matrix(h2o.biases(aeModels[[1]], vector_id=1));
-biases1.2 <- as.matrix(h2o.biases(aeModels[[1]], vector_id=2));
+testingData <- as.h2o(testData);
+predictions <- as.data.frame(h2o.predict(simpleModel, testingData))
 
-w2.1 <- as.matrix(h2o.weights(aeModels[[2]], matrix_id=1));
-w2.2 <- as.matrix(h2o.weights(aeModels[[2]], matrix_id=2));
-biases2.1 <- as.matrix(h2o.biases(aeModels[[2]], vector_id=1));
-biases2.2 <- as.matrix(h2o.biases(aeModels[[2]], vector_id=2));
+results <- data.frame(
+	File = rownames(testData),
+	Class = predictions[,"p1"],
+	stringsAsFactors = FALSE
+	)
 
-# temp <- cbind(as.matrix(trainingData), ifelse(trainBasicInfo$response, "Y", "N"));
-# colnames(temp)[ncol(temp)] <- "response";
-# temp <- as.h2o(temp)
-
-# lastModel <- h2o.deeplearning(
-# 	x = 1:256,
-# 	training_frame = temp, 
-# 	y = 257,
-# 	hidden = 10,
-# 	#balance_classes = TRUE,
-# 	epochs = 100 #,
-# 	#classification_stop = 0.99
-# )
-# summary(lastModel)
-
-# path <- h2o.saveModel(lastModel, path=file.path("..", "..", "output", "basicNNh2o"), force=TRUE)
-
-# save(w1.1, w1.2, biases1.1, biases1.2, 
-# 	w2.1, w2.2, biases2.1, biases2.2,
-# 	file = file.path("..", "..", "output", paste0(Sys.Date(), "-basicNNh2o-weights.RData"))
-# 	);
+write.table(results[,c(1,2)], 
+	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_", set, "_simpleModel.csv")), 
+	quote = FALSE, 
+	sep = ",",
+	col.names = TRUE,
+	row.names = FALSE
+	);

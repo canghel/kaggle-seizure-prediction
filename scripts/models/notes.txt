@@ -1,0 +1,12 @@
+### basic NNh2o.R #############################################################
+# trying just simplest idea 3) for now:
+#
+# ideas: 
+# 1) stacked autoencoder that decreases dim to 512-256 then goes down to 2 
+# classifier
+# 	- problem: weighing different samples? (only train with fracZero > something)
+# 	- can't do customisable NN (multivariate) using h2o
+# 2) two autoencoders, one for 0's and one for 1's
+#	- run new sample in both, then compare errors to determine the class 
+#	(method of comparing to other 1's and 0's signals?) 
+# 3) simplest: just 1024-(something)-2 classifier 

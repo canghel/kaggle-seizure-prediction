@@ -1,26 +1,24 @@
 ### basicSVM.R ################################################################
 # Try basic SVM model.
+# Actually - doing some bootstrapping (based on Honglei Xie's Dream9(?) 
+# Alzheimer's challenge work)
 #
 # To do
 # - need to scale/center test data properly
 # - maybe log?
 
 ### PREAMBLE ##################################################################
-#library(BoutrosLab.plotting.general);
 library(kernlab);
-library(pROC);
+library(R.matlab)
+library(ROCR);
 
 outputPath <- file.path("..", "..", "output", "svmModels"); 
 
 # reproducibility
 set.seed(1015);
 
-# do each set separately, to speed up
-set <- 1;
-
-### FUNCTIONS #################################################################
-
-
+# number of bootstraps
+B <- 100; 
 
 ### LOAD TRAINING DATA ########################################################
 
@@ -58,26 +56,10 @@ trainBasicInfo$response <- as.factor(trainBasicInfo$response)
 response <- trainBasicInfo$response[complete.cases(trainData)];
 trainData <- trainData[complete.cases(trainData),];
 trainData <- scale(trainData);
+N <- nrow(trainData);
 
 class.weights <- summary(response)/sum(summary(response))
 
-svmModel <- ksvm(
-	x = trainData, 
-	y = response, 
-	type = "C-svc",
-	kernel = "rbf",
-	C = 10,
-	#prob.model = TRUE,
-	class.weights = class.weights
-	);
-
-pred <- predict(svmModel, trainData, type="probabilities");
-#trainAUC <- auc(response, pred[,2])
-
-pred.obj <- prediction(pred[,2], response)
-perfAUC <- as.numeric(performance(pred.obj,"auc")@y.values);
-
- 
 ### PREDICT ###############################################################
 
 testData <-  readMat(file.path("..", "..", "output", "dataProcessing", paste0('20161125_test_', set, '_new_avgFreq.mat')));
@@ -86,19 +68,55 @@ testData <- testData$avgFreq;
 rownames(testData) <- files;
 
 # this is wrong need to scale using train data values
-trainData <- scale(testData);
+# also, why do I have so many NA's?? did I process data wrong?
+testData <- scale(testData);
+goodTestIndices <- which(complete.cases(testData)==TRUE);
+badTestIndices <- which(complete.cases(testData)==FALSE);
 
-testPredict <- predict(cvfit, newx = testData,  type = "response", s = 'lambda.min');
+pred <- matrix(NA, nrow=length(goodTestIndices), ncol=B);
 
-### MAKE DATAFRAME ########################################################
+for (b in 1:B){
 
-predictions <- data.frame(
+	i.train <- sample(1:N, size=N, replace = TRUE);
+
+	message("On sample # ", b);
+
+	svmModel <- ksvm(
+		x = trainData[i.train,], 
+		y = response[i.train], 
+		type = "C-svc",
+		kernel = "rbf",
+		C = 10,
+		prob.model = TRUE,
+		class.weights = class.weights
+		);
+
+	predVal <- predict(svmModel, trainData[-i.train,], type="probabilities");
+	predVal.obj <- prediction(predVal[,2], response[-i.train])
+	valAUC <- as.numeric(performance(predVal.obj,"auc")@y.values);
+	print(paste0("AUC on held out set: ", valAUC))
+
+	predAllTrain <- predict(svmModel, trainData, type="probabilities");
+	predAllTrain.obj <- prediction(predAllTrain[,2], response)
+	allTrainAUC <- as.numeric(performance(predAllTrain.obj,"auc")@y.values);
+	print(paste0("AUC on all training set: ", allTrainAUC))
+
+	pred[,b] <- predict(svmModel, testData[goodTestIndices,],  type="probabilities")[,2];
+
+}
+
+predMean <- apply(pred, 1, mean);
+
+predFinal <- rep(0, nrow(testData));
+predFinal[goodTestIndices] <- predMean;
+
+results <- data.frame(
 	File = rownames(testData),
-	Class = testPredict[,1],
+	Class = predFinal,
 	stringsAsFactors = FALSE
 	)
 
-write.table(predictions[,c(1,2)], 
+write.table(results[,c(1,2)], 
 	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_", set, "_svmModel.csv")), 
 	quote = FALSE, 
 	sep = ",",

@@ -12,6 +12,8 @@ library(kernlab);
 library(R.matlab)
 library(ROCR);
 
+source("scaleTestData.R")
+
 outputPath <- file.path("..", "..", "output", "svmModels"); 
 
 # reproducibility
@@ -55,6 +57,15 @@ trainBasicInfo$response <- as.factor(trainBasicInfo$response)
 
 response <- trainBasicInfo$response[complete.cases(trainData)];
 trainData <- trainData[complete.cases(trainData),];
+
+trainColMeans <- apply(trainData, 2, mean);
+trainColSd <- apply(trainData, 2, sd);
+
+# make sure it looks like scale
+#sanityCheckTemp <- scaleTestData(trainData, trainColMeans, trainColSd);
+#print(summary(sanityCheckTemp));
+#print(summary(as.vector(scale(trainData) - sanityCheckTemp)))
+
 trainData <- scale(trainData);
 N <- nrow(trainData);
 
@@ -67,9 +78,8 @@ files <- unlist(lapply(testData$allFiles, "[[", 1));
 testData <- testData$avgFreq;
 rownames(testData) <- files;
 
-# this is wrong need to scale using train data values
-# also, why do I have so many NA's?? did I process data wrong?
-testData <- scale(testData);
+# scaled using training values now
+testData <- scaleTestData(testData, trainColMeans, trainColSd);
 goodTestIndices <- which(complete.cases(testData)==TRUE);
 badTestIndices <- which(complete.cases(testData)==FALSE);
 

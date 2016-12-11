@@ -11,7 +11,7 @@ for (set in 1:3){
 	filename <- dir(
 		path = outputPath,
 		# match all files with given pattern
-		pattern = paste0("2016-11-26-15.*", set, "_simpleModel.csv"),
+		pattern = paste0("2016-12-01.*", set, "_simpleModel.csv"),
 		# return only names of visible files
 		all.files = FALSE,
 		# return only file names, not relative file paths

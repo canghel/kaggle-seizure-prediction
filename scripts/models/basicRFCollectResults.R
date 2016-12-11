@@ -1,6 +1,6 @@
 ### basicSVMCollectResults.R ##################################################
 
-outputPath <- file.path("..", "..", "output", "svmModels"); 
+outputPath <- file.path("..", "..", "output", "rfModels"); 
 
 results <- NULL;
 
@@ -9,7 +9,7 @@ for (set in 1:3){
 	filename <- dir(
 		path = outputPath,
 		# match all files with given pattern
-		pattern = paste0("2016-11-27.*", set, "_svmModel.csv"),
+		pattern = paste0("2016-11-30.*", set, "_rfModel.csv"),
 		# return only names of visible files
 		all.files = FALSE,
 		# return only file names, not relative file paths
@@ -30,7 +30,7 @@ for (set in 1:3){
 }
 
 write.table(results[,c(1,2)], 
-	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_all_svmModel.csv")), 
+	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_all_rfModel.csv")), 
 	quote = FALSE, 
 	sep = ",",
 	col.names = TRUE,

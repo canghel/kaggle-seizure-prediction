@@ -16,25 +16,33 @@ pred2 <- read.delim(file.path("..", "..", "submissions", "2016-11-27-14:17:48_al
 	stringsAsFactors = FALSE
 	);
 
-# pred3 <- read.delim(file.path("..", "..", "output", "svmModels", "2016-11-27-19:56:12_all_svmModel.csv"),
-# 	sep = ",",
-# 	stringsAsFactors = FALSE
-# 	);
+# rf
+pred3 <- read.delim(file.path("..", "..", "submissions", "2016-11-30-14:10:59_all_rfModel.csv"),
+	sep = ",",
+	stringsAsFactors = FALSE
+	);
+
+# ensemble of nn
+pred4<- read.delim("/home/canghel/personal-projects/output/basicNNh2o/2016-12-01-09:18:50_all_simpleModel.csv",
+	sep = ",",
+	 	stringsAsFactors = FALSE
+ 	);
 
 ### MERGE AND AVERAGE #########################################################
 pred <- merge(pred1, pred2, by.x="File", by.y="File")
-#pred <- merge(pred, pred3, by.x="File", by.y="File")
+pred <- merge(pred, pred3, by.x="File", by.y="File")
+pred <- merge(pred, pred4, by.x="File", by.y="File")
 
 png(file.path("..", "..", "output", "ensemble", "prediction-agreement.png"));
-plot(pred[,2], pred[,3])
+plot(pred[,3], pred[,4])
 dev.off()
 
 print("correlation between two examples")
-print(cor(pred[,2], pred[,3]))
+print(cor(pred[,3], pred[,4]))
 
 results <- data.frame(
 	File = pred$File,
-	Class = rowMeans(pred[,2:3]),
+	Class = rowMeans(pred[,2:5]),
 	stringsAsFactors = FALSE
 	);
 

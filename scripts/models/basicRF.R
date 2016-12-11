@@ -1,26 +1,11 @@
-### basicSVM.R ################################################################
-# Try basic SVM model.
-# Actually - doing some bootstrapping (based on Honglei Xie's Dream9(?) 
-# Alzheimer's challenge work)
-#
-# To do
-# - need to scale/center test data properly
-# - maybe log?
-
-### PREAMBLE ##################################################################
-library(kernlab);
-library(R.matlab)
+### basicRF.R #################################################################
+library(randomForest);
 library(ROCR);
 
-source("scaleTestData.R")
-
-outputPath <- file.path("..", "..", "output", "svmModels"); 
+outputPath <- file.path("..", "..", "output", "rfModels"); 
 
 # reproducibility
 set.seed(1015);
-
-# number of bootstraps
-B <- 100; 
 
 ### LOAD TRAINING DATA ########################################################
 
@@ -79,46 +64,27 @@ testData <- testData$avgFreq;
 rownames(testData) <- files;
 
 # scaled using training values now
-testData <- scaleTestData(testData, trainColMeans, trainColSd);
+testData <- scale(testData);
 goodTestIndices <- which(complete.cases(testData)==TRUE);
 badTestIndices <- which(complete.cases(testData)==FALSE);
 
-pred <- matrix(NA, nrow=length(goodTestIndices), ncol=B);
+rfModel <- randomForest(
+    x = trainData,
+    y = response,
+    replace = TRUE,
+    mtry = 2,
+    ntree = 2000,
+    nodesize = 10,
+    classwt = class.weights,
+    do.trace=100
+);
 
-for (b in 1:B){
+### PREDICT ###################################################################
 
-	i.train <- sample(1:N, size=N, replace = TRUE);
-
-	message("On sample # ", b);
-
-	svmModel <- ksvm(
-		x = trainData[i.train,], 
-		y = response[i.train], 
-		type = "C-svc",
-		kernel = "rbf",
-		C = 10,
-		prob.model = TRUE,
-		class.weights = class.weights
-		);
-
-	predVal <- predict(svmModel, trainData[-i.train,], type="probabilities");
-	predVal.obj <- prediction(predVal[,2], response[-i.train])
-	valAUC <- as.numeric(performance(predVal.obj,"auc")@y.values);
-	print(paste0("AUC on held out set: ", valAUC))
-
-	predAllTrain <- predict(svmModel, trainData, type="probabilities");
-	predAllTrain.obj <- prediction(predAllTrain[,2], response)
-	allTrainAUC <- as.numeric(performance(predAllTrain.obj,"auc")@y.values);
-	print(paste0("AUC on all training set: ", allTrainAUC))
-
-	pred[,b] <- predict(svmModel, testData[goodTestIndices,],  type="probabilities")[,2];
-
-}
-
-predMean <- apply(pred, 1, mean);
+predictions <- predict(rfModel, newdata = testData[goodTestIndices,], type="prob");
 
 predFinal <- rep(0, nrow(testData));
-predFinal[goodTestIndices] <- predMean;
+predFinal[goodTestIndices] <- predictions[,2];
 
 results <- data.frame(
 	File = rownames(testData),
@@ -127,7 +93,7 @@ results <- data.frame(
 	)
 
 write.table(results[,c(1,2)], 
-	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_", set, "_svmModel.csv")), 
+	file = file.path(outputPath, paste0(Sys.Date(), "-",  substr(Sys.time(), 12, 19), "_", set, "_rfModel.csv")), 
 	quote = FALSE, 
 	sep = ",",
 	col.names = TRUE,

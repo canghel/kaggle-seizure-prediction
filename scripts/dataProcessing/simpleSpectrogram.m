@@ -1,6 +1,6 @@
 %% Load file 
 
-fileToLoad = '1_37_1.mat'; kk = 4;
+fileToLoad = '1_54_0.mat'; kk = 4;
 
 cd('C:/Users/cvanghel/Documents/personal-projects/kaggle-seizure-prediction/scripts/dataProcessing');
 dataPath = '../../data';
@@ -34,7 +34,8 @@ tNonzero = find(sum(ps,1)~=0);
 
 %figure(kk); image(ps(fLower:fHigher, tNonzero));
 
-subsetPs = ps(fLower:fHigher, tNonzero);
-subsetW = w(fLower:fHigher);
-figure(kk); plot(subsetW, mean(subsetPs,2));
+figure(kk); image(ps(:, tNonzero));
 
+%subsetPs = ps(fLower:fHigher, tNonzero);
+%subsetW = w(fLower:fHigher);
+%figure(kk); plot(subsetW, mean(subsetPs,2));

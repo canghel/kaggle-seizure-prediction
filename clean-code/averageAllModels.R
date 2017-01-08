@@ -5,25 +5,28 @@
 
 # weighted glm
 pred1 <- read.delim( 
-	file = file.path("allGLM.csv"),
+	file = "allGLM.csv",
 	sep = ",",
 	stringsAsFactors = FALSE
 	);
 
 # boosted svm
-pred2 <- read.delim("allSVM.csv"),
+pred2 <- read.delim(
+	"allSVM.csv",
 	sep = ",",
 	stringsAsFactors = FALSE
 	);
 
 # rf
-pred3 <- read.delim("allRF.csv"),
+pred3 <- read.delim(
+	"allRF.csv",
 	sep = ",",
 	stringsAsFactors = FALSE
 	);
 
 # ensemble of nn
-pred4 <- read.delim("allNN.csv",
+pred4 <- read.delim(
+	"allNN.csv",
 	sep = ",",
 	stringsAsFactors = FALSE
  	);

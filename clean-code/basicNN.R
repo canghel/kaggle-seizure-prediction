@@ -67,7 +67,7 @@ trainData <- temp;
 
 ### FEATURE SELECTION #########################################################
 
-#source("basicNNh2oIQRFeatureSelection.R");
+source("../scripts/models/basicNNh2oIQRFeatureSelection.R");
 #browser();
 predictors <- setdiff(names(trainData), "response")
 trainingData <- as.h2o(trainData);
@@ -78,38 +78,38 @@ allPred <- matrix(0, nrow(testData), S);
 
 for (seedVal in 1:S){
 
-simpleModel <- h2o.deeplearning(
-	# training data
-	training_frame = trainingData,
-	x = predictors,
-	y = "response",
-	# structure of network
-	activation = "TanhWithDropout", 
-	hidden = c(secondLayer), 
-	# use adadelta
-	adaptive_rate = TRUE, 
-	# CV, epochs, dropout, penalty, weights
-	nfolds = 10,
-	input_dropout_ratio = 0.2,
-   	epochs = 1000, 
-   	l1 = 1e-3, 
-   	# l2 = 1e-5, 
-	weights_column = "weights",
-	stopping_metric = "AUC",
-	stopping_tolerance = 0.01,
-	# other arguments
-	seed = seedVal, # may not be reproducible even with this due to memory management 
-	export_weights_and_biases = TRUE 
-	);
+	simpleModel <- h2o.deeplearning(
+		# training data
+		training_frame = trainingData,
+		x = predictors,
+		y = "response",
+		# structure of network
+		activation = "TanhWithDropout", 
+		hidden = c(secondLayer), 
+		# use adadelta
+		adaptive_rate = TRUE, 
+		# CV, epochs, dropout, penalty, weights
+		nfolds = 10,
+		input_dropout_ratio = 0.2,
+	   	epochs = 1000, 
+	   	l1 = 1e-3, 
+	   	# l2 = 1e-5, 
+		weights_column = "weights",
+		stopping_metric = "AUC",
+		stopping_tolerance = 0.01,
+		# other arguments
+		seed = seedVal, # may not be reproducible even with this due to memory management 
+		export_weights_and_biases = TRUE 
+		);
 
-print(simpleModel@model$cross_validation_metrics_summary)
+	print(simpleModel@model$cross_validation_metrics_summary)
 
-### PREDICTIONS ###############################################################
+	### PREDICTIONS ###############################################################
 
-testingData <- as.h2o(testData);
-predictions <- as.data.frame(h2o.predict(simpleModel, testingData))
+	testingData <- as.h2o(testData);
+	predictions <- as.data.frame(h2o.predict(simpleModel, testingData))
 
-allPred[,seedVal] <- predictions[, "p1"]
+	allPred[,seedVal] <- predictions[, "p1"]
 
 }
 

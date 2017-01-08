@@ -4,6 +4,9 @@
 # this script isn't self-contained in this directory (needs files in 
 # submissions and output directories)
 
+### PREAMBLE ##################################################################
+library("BoutrosLab.plotting.general");
+
 ### FUNCTIONS #################################################################
 compareModels <- function(modelName, pred1, pred2){
 	print(paste0("Comparing ", modelName, " models ----------------"))
@@ -25,6 +28,18 @@ compareModels <- function(modelName, pred1, pred2){
 			print(summary((pred1[,2]-pred2[,2])/pred1[,2]));
 			print("Correlation:");
 			print(cor(pred1[,2],pred2[,2]));
+			create.boxplot(
+				file = file.path(".", paste0(modelName, "-differences.png")),
+				formula = y ~ x, 
+				data = data.frame(
+					y = pred1[,2]-pred2[,2],
+					x = rep("diff", length(pred1[,2]))
+					),
+				add.stripplot = TRUE,
+				resolution = 400,
+				jitter.factor = 0.5,
+				jitter.amount = 0.2
+				)
 		}
 	}
 }
@@ -53,15 +68,16 @@ svmRedone <- read.delim(
 	); 
 
 ### NN ########################################################################
-nnOriginal <- read.delim(file.path("..", "output", "basicNNh2o", "2016-12-01-09:18:50_all_simpleModel.csv"),
+# not actually a submission, but used in the averaging
+nnOriginal <- read.delim(file.path("..", "submissions", "2016-12-01-09:18:50_all_simpleModel.csv"),
 	sep = ",",
-	 	stringsAsFactors = FALSE
+	stringsAsFactors = FALSE
  	);
-# nnRedone <- read.delim( 
-# 	file = "allNN.csv",
-# 	sep = ",",
-# 	stringsAsFactors = FALSE
-# 	); 
+nnRedone <- read.delim( 
+	file = "allNN.csv",
+	sep = ",",
+	stringsAsFactors = FALSE
+	); 
 
 ### RF #######################################################################
 rfOriginal <- read.delim(file.path("..", "submissions", "2016-11-30-14:10:59_all_rfModel.csv"),
@@ -78,4 +94,4 @@ rfRedone <- read.delim(
 compareModels("GLM", glmOriginal, glmRedone)
 compareModels("SVM", svmOriginal, svmRedone)
 compareModels("RF", rfOriginal, rfRedone)
-#compareModels("NN", nnOriginal, nnRedone)
+compareModels("NN", nnOriginal, nnRedone)

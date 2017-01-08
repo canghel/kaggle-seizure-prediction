@@ -33,4 +33,4 @@ source("basicNN.R")
 
 ### COLLECT RESULTS FROM ALL SETS #############################################
 
-collectResults(outputPath, "_new_SVM_predictions.csv", "allNN.csv");
+collectResults(outputPath, "_new_NN_predictions.csv", "allNN.csv");

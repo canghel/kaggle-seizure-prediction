@@ -1,10 +1,26 @@
 # clean-code
 I refactored some of my code (note to self: make paths more portable next time!!) so that it would be easier to repoduce my top solution to the competition. 
 
-## Running feature extraction/selection
+## Feature extraction/selection
 
-## Running the ensemble of models
-The following feature extraction/selection files should be in the current directory:
+### Basic info table
+Obtain the fraction of zeros in each file by running the following in MATLAB:
+
+ 	runGetFractionZero;
+
+and then create a nice table with both fraction zero and the response by running the following in R:
+
+	source('runMakeBasicInfoTable.R');
+
+These commands create six tables (for both the training and the original test sets), but only the training data is used in model-building.
+
+### Frequency features
+
+### Update to use only 'safe' labels
+
+
+## Ensemble of models
+The following feature files should be in the current directory:
 
 *	`trainBasicInfo.csv`
 * 	`train_1_avgFreq.RData`, `train_2_avgFreq.RData`, `train_3_avgFreq.RData`

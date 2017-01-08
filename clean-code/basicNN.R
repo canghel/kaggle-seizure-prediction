@@ -67,8 +67,6 @@ trainData <- temp;
 
 ### FEATURE SELECTION #########################################################
 
-source("../scripts/models/basicNNh2oIQRFeatureSelection.R");
-#browser();
 predictors <- setdiff(names(trainData), "response")
 trainingData <- as.h2o(trainData);
 

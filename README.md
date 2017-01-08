@@ -13,8 +13,9 @@ I used only frequency data from the EEG electrical signals for each patient (due
 
 The details are as follows:
 
-*   For each channel, I used a windowed Fourier transform to get the local frequencies in overlapping windows along the signal.  I chose a [Kaiser window](https://www.mathworks.com/help/signal/ug/kaiser-window.html) with the default \beta = 0.05, of window length 1000 points (= 2.5 s) and a small overap of 1/4 of the window length (i.e. 250 points = 0.625 s). 
-*	To further restrict the number of features, I selected only the frequencies in the 5-30 Hz range.  Li et al. restrict to 8-30 Hz for motor imagery, and a quick Internet search reveals that the range of frequencies generally associated to an epilepsy seisure is 0.1-0.5 Hz to 30-40 Hz although higher frequency oscillations are also likely to be important (e.g. Greg A. Worrell et al. [Brain (2004), 127, 1496-1506](http://brain.oxfordjournals.org/content/127/7/1496)).
+*	For each channel, I used a windowed Fourier transform to get the local frequencies in overlapping windows along the signal.  I chose a [Kaiser window](https://www.mathworks.com/help/signal/ug/kaiser-window.html) with the default \beta = 0.05, of window length 1000 points (= 2.5 s) and a small overlap of 1/4 of the window length (i.e. 250 points = 0.625 s). 
+*	To further restrict the number of features, I selected only the frequencies in the 5-30 Hz range.  Li et al. restrict to 8-30 Hz for motor imagery, and a quick Internet search reveals that the range of frequencies traditionally associated to an epilepsy seisure is 0.1-0.5 Hz to 30-40 Hz although higher frequency oscillations are also likely to be important (e.g. Greg A. Worrell et al. [Brain (2004), 127, 1496-1506](http://brain.oxfordjournals.org/content/127/7/1496)).
+*	For each channel, I took the mean of the frequencies across all windows. 
 *	Similar to Li et al., I concatenated the frequency data of each of the 16 channels into a long feature vector for each patient. 
 
 ### Models
@@ -23,11 +24,7 @@ The details are as follows:
 
 ### Possible improvements
 
-#### Feature selection:
-*   Include features from the 
-
-
-
+(Under construnction)
 
 ### Acknowledgments
 

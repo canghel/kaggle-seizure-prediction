@@ -22,6 +22,10 @@ The details are as follows:
 
 (Under construnction)
 
+### Code
+
+The code for my last submission and the instructions on how to run it is in the `clean-code` directory.
+
 ### Possible improvements
 
 (Under construnction)

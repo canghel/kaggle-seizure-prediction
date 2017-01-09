@@ -2,18 +2,8 @@
 % Get just the frequencies from 0 to 30 over all the channels
 % do it for a dataset
 
-%% Load dataset
-
-dataPath = '../data';
-folderName = strcat(whichSet, '_', num2str(ss));
-if (strcmp(whichSet,'test'))
-    folderName = strcat(folderName, '_new')
-end
-folderPath = fullfile(dataPath, folderName);
-outputPath = '.';
-
 % get zero and one filenames
-allFiles = getFilenames(ss, whichSet, dataPath);
+allFiles = getFilenames(whichSet, folderPath);
 numFiles = length(allFiles);
 
 %% Get features
@@ -34,5 +24,5 @@ for j=1:numFiles
     avgFreq(j,:) = simpleFreqFeatures(fileToLoad, folderPath, windowWidth, windowFracOverlap);
 end
 
-filename = strcat(num2str(yyyymmdd(datetime)), '_', folderName, '_avgFreq.mat');
+filename = strcat(folderName, '_avgFreq.mat');
 save(fullfile(outputPath, filename), 'allFiles', 'avgFreq');

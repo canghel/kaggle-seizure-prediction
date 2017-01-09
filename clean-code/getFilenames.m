@@ -1,19 +1,14 @@
-function [allFiles, zeroFiles, oneFiles] = getFilenames(ss, trainOrTest, dataPath)
-% function [allFiles zeroFiles oneFiles] = getFilenames(ss, trainOrTest= 'train', dataPath = 'C:/Users/cvanghel/Documents/personal-projects/kaggle-seizure-prediction/data')
+function [allFiles, zeroFiles, oneFiles] = getFilenames(trainOrTest, folderPath)
+% function [allFiles zeroFiles oneFiles] = getFilenames(trainOrTest, folderPath)
 % Inputs:
-% - ss: 1,2,or 3 the dataset to get filenames for
 % - trainOrTest: 'train' or 'test'
+% - folderPath
 % Outputs:
 % - allFiles
 % - zeroFiles
 % - oneFiles
 
-if nargin < 3
-     dataPath = 'C:/Users/cvanghel/Documents/personal-projects/kaggle-seizure-prediction/data';
-end
-    
-dataset = strcat(trainOrTest, '_', num2str(ss));
-dirData = dir(fullfile(dataPath, dataset));
+dirData = dir(folderPath);
 dirIndex = [dirData.isdir];
 allFiles = {dirData(~dirIndex).name};
 allFiles = cellstr(allFiles);

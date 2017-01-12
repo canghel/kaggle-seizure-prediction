@@ -19,7 +19,7 @@ with versions as below:
 	attached base packages:
 	 [1] stats     graphics  grDevices utils     datasets  methods   base
 
-		other attached packages:
+	other attached packages:
 	 [1] h2o_3.10.0.8        statmod_1.4.27      data.table_1.10.0
 	 [4] glmnet_2.0-5        foreach_1.4.3       Matrix_1.2-7.1
 	 [7] randomForest_4.6-12 ROCR_1.0-7          gplots_3.0.1

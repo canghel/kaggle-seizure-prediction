@@ -24,7 +24,7 @@ The details are as follows:
 
 ### Code
 
-The code for my last submission and the instructions on how to run it is in the `clean-code` directory.
+The code for my last submission and the instructions on how to run it is in the [`clean-code`](https://github.com/canghel/kaggle-seizure-prediction) directory.
 
 ### Possible improvements
 

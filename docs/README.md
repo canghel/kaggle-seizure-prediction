@@ -40,8 +40,8 @@ Because I did not have enough time, my strategy was to average many different ty
 #### General Linear Model
 
 *    The first test model was a GLM on “macro” features of the data: the average and  standard deviation of the signals from the 16 channels for each 10-minute data clip.  **AUC: 0.52** (very poor!)
-*    For all subsequent models, I used the feature vector described in the section above, for each data clip.  For the second model, I reweighed each sample in the training set by 1 - (the fraction of zeros in the file).  As described in the challenge data description, a large number of zeros represents "data dropout" where the implant has failed to record any signal.  Therefore, a signal with a large number of zeros is a lower-quality signal and less informative. _AUC: Public = 0.62_
-*    For the third GLM model, I tried to address the class imbalance between preictal and interictal classes. I am not sure if this is the correct approach, but I changed the weight of a training sample to [1 - (the fraction of zeros in the file)]<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\times" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\times" title="\times" /></a>[the fraction of observations with that outcome]. **AUC: 0.757, 0.745**
+*    For all subsequent models, I used the feature vector described in the section above, for each data clip.  For the second model, I reweighed each sample in the training set by 1 - (the fraction of zeros in the file).  As described in the challenge data description, a large number of zeros represents "data dropout" where the implant has failed to record any signal.  Therefore, a signal with a large number of zeros is a lower-quality signal and less informative. **AUC: 0.62**
+*    For the third GLM model, I tried to address the class imbalance between preictal and interictal classes. I am not sure if this is the correct approach, but I changed the weight of a training sample to [1 - (the fraction of zeros in the file)]x[the fraction of observations with that outcome]. **AUC: 0.757, 0.745**
 
 <!-- 2016-11-25-19%3A17%3A20_Basic.csv -->
 
@@ -77,7 +77,7 @@ Because I did not have enough time, my strategy was to average many different ty
 #### Final Ensemble:
 
 *    To improve the neural network performance, I averaged 10 neural networks with the same structure, starting from different random seeds.  I changed some of the parameters from the previous neural network, most importantly, adding dropout. 
-*    I averaged this NN model and the GLM, SVM, and RF models together for the final result.
+*    I averaged this NN model and the GLM, SVM, and RF models together for the final result. **AUC: 0.800, 0.781**
 
 ## Code
 
